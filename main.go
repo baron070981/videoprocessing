@@ -1,24 +1,16 @@
 package main
 
 import (
-	"net/http"
-	"os"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
-
-// сервер с серверным приложением принимает от клиента видеофайл
-// и время. Возвращает изображение кадра соответствуещего времени.
-
-// клиент переходит по ссылке и получает видео и время. Обрабатывает.
-// Отправляет обратно кадр соответствующий времени.
-// 
-
-
-func download(url string) (error){
-	fl,err := os.Create("testfile.mp4")
-	if err != nil{
+func download(url string) error {
+	fl, err := os.Create("testfile.mp4")
+	if err != nil {
 		fmt.Println("Error create file...")
 		return err
 	}
@@ -30,21 +22,25 @@ func download(url string) (error){
 	}
 	defer resp.Body.Close()
 	io.Copy(fl, resp.Body)
+	data, err := ioutil.ReadFile("testfile.mp4")
+	if err != nil {
+		fmt.Println("Error read file")
+		return err
+	}
+	nd := make([]byte, len(data))
+	for _, b := range data {
+		if b == '\x00' {
+			nd = append(nd, b)
+		}
+	}
+
+	fmt.Println(string(nd))
 	return nil
 }
 
+func main() {
 
-
-
-func main(){
-	
 	fmt.Println("Start")
 	download("https://whatsaper.ru/wp-content/plugins/download-attachments/includes/download.php?id=1630")
-	
-	
+
 }
-
-
-
-
-
